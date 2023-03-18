@@ -3,12 +3,14 @@ import Filter from './components/Filter';
 import PersonForm from './components/PersonForm';
 import Persons from './components/Persons';
 import personService from './services/persons'
+import Notification from './components/Notification';
 
 const App = () => {
   const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('');
   const [filter, setFilter] = useState('');
+  const [message, setMessage] = useState(null);
 
   useEffect(() => {
     personService.getAll().then(initPers => {
@@ -49,6 +51,7 @@ const App = () => {
 
     personService.create(newPerson).then(addedPerson => {
       setPersons([...persons, addedPerson])
+      makeNotification(`Added ${addedPerson.name}`)
     })
     clearInputs()
   }
@@ -58,6 +61,7 @@ const App = () => {
     modPerson = {...modPerson, id: person.id}
     personService.update(modPerson).then(updatedPerson => {
       setPersons(persons.map(p => p.id === updatedPerson.id ? updatedPerson : p))
+      makeNotification(`Updated ${updatedPerson.name}`)
     })
   }
 
@@ -65,6 +69,7 @@ const App = () => {
     if (!window.confirm(`Delete ${person.name}?`)) return
     personService.remove(person.id).then(data => {
       setPersons(persons.filter(p => p.id !== person.id))
+      makeNotification(`Removed ${person.name}`)
     })
   }
 
@@ -73,9 +78,17 @@ const App = () => {
     setNewNumber('')
   }
 
+  const makeNotification = mes => {
+    setMessage(mes)
+    setTimeout(() => {
+      setMessage(null)
+    }, 5000);
+  }
+
   return (
     <div>
       <h1>Phonebook</h1>
+      <Notification message={message} />
       <Filter filter={filter} handleFilterChange={handleFilterChange} />
       <h2>Add new contact</h2>
       <PersonForm 
