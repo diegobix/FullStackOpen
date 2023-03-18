@@ -1,9 +1,9 @@
-const Notification = ({message}) => {
+const Notification = ({message, isError}) => {
   if (message === null)
     return null
   
   const notificationStyle = {
-    color: 'green',
+    color: isError ? 'red' : 'green',
     background: 'lightgrey',
     fontSize: 20,
     borderStyle: 'solid',

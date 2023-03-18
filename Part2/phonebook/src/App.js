@@ -11,6 +11,7 @@ const App = () => {
   const [newNumber, setNewNumber] = useState('');
   const [filter, setFilter] = useState('');
   const [message, setMessage] = useState(null);
+  const [isError, setIsError] = useState(false);
 
   useEffect(() => {
     personService.getAll().then(initPers => {
@@ -51,7 +52,7 @@ const App = () => {
 
     personService.create(newPerson).then(addedPerson => {
       setPersons([...persons, addedPerson])
-      makeNotification(`Added ${addedPerson.name}`)
+      makeNotification(`Added ${addedPerson.name}`, false)
     })
     clearInputs()
   }
@@ -61,7 +62,7 @@ const App = () => {
     modPerson = {...modPerson, id: person.id}
     personService.update(modPerson).then(updatedPerson => {
       setPersons(persons.map(p => p.id === updatedPerson.id ? updatedPerson : p))
-      makeNotification(`Updated ${updatedPerson.name}`)
+      makeNotification(`Updated ${updatedPerson.name}`, false)
     })
   }
 
@@ -69,7 +70,9 @@ const App = () => {
     if (!window.confirm(`Delete ${person.name}?`)) return
     personService.remove(person.id).then(data => {
       setPersons(persons.filter(p => p.id !== person.id))
-      makeNotification(`Removed ${person.name}`)
+      makeNotification(`Removed ${person.name}`, false)
+    }).catch(error => {
+      makeNotification(`Information of ${person.name} has already been removed from server`, true)
     })
   }
 
@@ -78,7 +81,9 @@ const App = () => {
     setNewNumber('')
   }
 
-  const makeNotification = mes => {
+  const makeNotification = (mes, error=false) => {
+    console.log(error);
+    setIsError(error)
     setMessage(mes)
     setTimeout(() => {
       setMessage(null)
@@ -88,7 +93,7 @@ const App = () => {
   return (
     <div>
       <h1>Phonebook</h1>
-      <Notification message={message} />
+      <Notification message={message} isError={isError} />
       <Filter filter={filter} handleFilterChange={handleFilterChange} />
       <h2>Add new contact</h2>
       <PersonForm 
